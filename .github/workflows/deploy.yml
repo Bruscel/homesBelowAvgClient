@@ -1,0 +1,70 @@
+name: Deploy Angular app to Raspberry Pi
+
+on:
+  push:
+    branches:
+      - master  # Change this to your desired branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'  # Use the version of Node.js you want
+
+      - name: Install dependencies
+        run: |
+          npm install
+          
+      - name: Build the Angular app
+        run: |
+          npm run build -- --configuration production  # Run "ng build --prod"
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.PI_SSH_KEY }}  # Store your private key in GitHub Secrets
+
+      - name: Deploy to Raspberry Pi
+        run: |
+          # Create the directory on the Raspberry Pi if it doesn't exist
+          ssh -o StrictHostKeyChecking=no pi@${{ secrets.RASPBERRY_PI_IP }} "mkdir -p /home/pi/Documents/apps/client"
+          # Copy the built Angular app files to the Raspberry Pi
+          scp -r ./dist/client/* pi@${{ secrets.RASPBERRY_PI_IP }}:/home/pi/Documents/apps/client
+          
+      - name: Stop or delete the existing Angular-SSR process (if running)
+        run: |
+          ssh -t pi@${{ secrets.RASPBERRY_PI_IP }} << 'EOF'
+            # Stop and delete the existing angular-ssr process, if running
+            pm2 stop angular-ssr || echo "No existing angular-ssr process found"
+            pm2 delete angular-ssr || echo "No existing angular-ssr process found"
+            pm2 save || true
+          EOF
+      - name: Start Angular app on Raspberry Pi
+        run: |
+          # SSH into Raspberry Pi and restart the server or start the app
+          ssh -o StrictHostKeyChecking=no pi@${{ secrets.RASPBERRY_PI_IP }} << 'EOF'
+            # Check if any process is running on port 4000 (the app's port)
+            if lsof -Pi :4000 -sTCP:LISTEN -t > /dev/null ; then
+              echo "App is already running on port 4000. Restarting..."
+              # Kill the existing process running on port 4000
+              fuser -k 4000/tcp
+              sleep 2  # Wait for the process to stop
+            else
+              echo "No app running on port 4000. Starting the server..."
+            fi
+
+            # Navigate to the app directory
+            cd /home/pi/Documents/apps/client/server
+
+            # Start the app using Node.js (without PM2)
+            nohup node server.mjs --experimental-modules &
+
+            
+          EOF

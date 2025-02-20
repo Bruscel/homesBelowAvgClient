@@ -1,0 +1,84 @@
+
+
+<div class="container mt-4">
+    <h2>Neighborhoods List</h2>
+    <table class="table table-bordered table-striped">
+      <thead class="thead-dark">
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of neighborhoods">
+          <td>{{ item.neighborhoodId }}</td>
+          <td>{{ item.neighborhoodName }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#neighborhoodModal">
+    Launch demo modal
+  </button>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="neighborhoodModal" tabindex="-1" aria-labelledby="neighborhoodModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="neighborhoodModal">Add Neighborhood</h5>
+          <button #closeModalBtn type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form [formGroup]="addNeighborhoodForm" (ngSubmit)="onSubmit()" id="myForm" class="row g-3" >
+              <div class="col-md-6">
+                <label for="neighborhoodName" class="form-label">Name:</label>
+                <input id="neighborhoodName" class="form-control" formControlName="neighborhoodName" required />
+                <div *ngIf="addNeighborhoodForm.get('neighborhoodName')?.invalid && addNeighborhoodForm.get('neighborhoodName')?.touched " class="form-text">
+                  Name is required.
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label for="city" class="form-label">City:</label>
+                <input id="city" class="form-control"  formControlName="city" required />
+                <div *ngIf="addNeighborhoodForm.get('city')?.invalid && addNeighborhoodForm.get('city')?.touched" class="form-text">
+                  Enter a valid city.
+                </div>
+              </div>
+              <div class="col-md-2">
+                <label for="zip" class="form-label">Zip:</label>
+                <input id="zip" class="form-control"  formControlName="zip" required />
+              </div>
+              <div class="col-md-2">
+                  <label for="state" class="form-label">State:</label>
+                  <input id="state" class="form-control"  formControlName="state" required />
+              </div>
+              <div class="col-md-2">
+                  <label for="latitude" class="form-label">Latitude:</label>
+                  <input id="latitude" class="form-control"  formControlName="latitude" required />
+              </div>
+              <div class="col-md-2">
+                  <label for="longitude" class="form-label">Longitude:</label>
+                  <input id="longitude" class="form-control"  formControlName="longitude" required />
+              </div>
+              <div class="col-md-2">
+                  <label for="feetRadius" class="form-label">FeetRadius:</label>
+                  <input id="feetRadius" class="form-control"  formControlName="feetRadius" required />
+              </div>
+              <div class="col-12 d-flex justify-content-end">
+                <button type="submit" [disabled]="addNeighborhoodForm.invalid" class="btn btn-light">Submit</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+  
+  
+  
+  
