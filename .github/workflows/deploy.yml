@@ -34,9 +34,9 @@ jobs:
       - name: Deploy to Raspberry Pi
         run: |
           # Create the directory on the Raspberry Pi if it doesn't exist
-          ssh -o StrictHostKeyChecking=no pi@${{ secrets.RASPBERRY_PI_IP }} "mkdir -p /home/pi/Documents/apps/client"
+          ssh -o StrictHostKeyChecking=no pi@${{ secrets.RASPBERRY_PI_IP }} "mkdir -p /home/pi/Documents/apps/client-app"
           # Copy the built Angular app files to the Raspberry Pi
-          scp -r ./dist/client/* pi@${{ secrets.RASPBERRY_PI_IP }}:/home/pi/Documents/apps/client
+          scp -r ./dist/client/* pi@${{ secrets.RASPBERRY_PI_IP }}:/home/pi/Documents/apps/client-app
           
       - name: Stop or delete the existing Angular-SSR process (if running)
         run: |
@@ -61,7 +61,7 @@ jobs:
             fi
 
             # Navigate to the app directory
-            cd /home/pi/Documents/apps/client/server
+            cd /home/pi/Documents/apps/client-app/
 
             # Start the app using Node.js (without PM2)
             nohup node server.mjs --experimental-modules &
