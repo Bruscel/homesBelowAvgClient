@@ -1,20 +1,32 @@
 
 
 <div class="container mt-4">
-    <h2>Neighborhoods List</h2>
-    <table class="table table-bordered table-striped">
+    <h2>Neighborhoods</h2>
+    <table #dataTable class="table table-bordered table-striped display">
       <thead class="thead-dark">
         <tr>
           <th>ID</th>
           <th>Name</th>
+          <th>City</th>
+          <th>Zip</th>
+          <th>State</th>
+          <th>Latitude</th>
+          <th>Longitude</th>
+          <th>Feet Radius</th>
         </tr>
       </thead>
-      <tbody>
+      <!-- <tbody>
         <tr *ngFor="let item of neighborhoods">
           <td>{{ item.neighborhoodId }}</td>
           <td>{{ item.neighborhoodName }}</td>
+          <td>{{ item.city }}</td>
+          <td>{{ item.zip }}</td>
+          <td>{{ item.state }}</td>
+          <td>{{ item.latitude }}</td>
+          <td>{{ item.longitude }}</td>
+          <td>{{ item.feetRadius }}</td>
         </tr>
-      </tbody>
+      </tbody> -->
     </table>
   </div>
   

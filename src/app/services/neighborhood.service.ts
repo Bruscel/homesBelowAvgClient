@@ -40,4 +40,8 @@ export class NeighborhoodService {
       catchError(this.handleError<Neighborhood[]>('getNeighborhoods', []))
     );
   }
+
+  deleteNeighborhood(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }
