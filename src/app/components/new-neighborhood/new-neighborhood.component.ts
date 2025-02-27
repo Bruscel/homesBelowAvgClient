@@ -106,7 +106,7 @@ export class NewNeighborhoodComponent implements OnInit {
                       data: null, 
                       render: (data: any) => `
                         <button class='btn btn-danger btn-sm delete-btn' data-id='${data.neighborhoodId}'>Delete</button> 
-                        <button class='btn btn-light update-btn' data-id='${data.neighborhoodId}'>Update</button>
+                        <button class='btn btn-light btn-sm update-btn' data-id='${data.neighborhoodId}'>Update</button>
                       `
                     }
                 ],
