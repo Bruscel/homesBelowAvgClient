@@ -3,61 +3,54 @@
   <br>
   <!-- Table -->
   <table #dataTable class="table table-striped"></table>
-  <button class="btn btn-primary d-flex justify-content-end" (click)="addNeighborhood()">Add Neighborhood</button>
-
+  <br>
+  <div class="d-flex justify-content-front mb-3"><button class="btn btn-primary" (click)="addNeighborhood()">Add Neighborhood</button></div>
   <!-- Modal -->
   <div #modalElement class="modal fade" id="neighborhoodModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title">{{ isEditMode ? 'Edit' : 'Add' }} Neighborhood</h5>
-                  <button type="button" class="btn-close" (click)="closeModal()"></button>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">{{ isEditMode ? 'Edit' : 'Add' }} Neighborhood</h5><button type="button" class="btn-close" (click)="closeModal()"></button></div>
+        <div class="modal-body">
+          <form [formGroup]="addNeighborhoodForm" (ngSubmit)="onSubmit()">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label for="neighborhoodName" class="form-label">Name:</label>
+                <input id="neighborhoodName" class="form-control" formControlName="neighborhoodName" required />
+                <div *ngIf="addNeighborhoodForm.get('neighborhoodName')?.invalid && addNeighborhoodForm.get('neighborhoodName')?.touched" class="form-text">Name is required.</div>
               </div>
-              <div class="modal-body">
-                  <form [formGroup]="addNeighborhoodForm" (ngSubmit)="onSubmit()">
-                      <div class="col-md-6">
-                        <label for="neighborhoodName" class="form-label">Name:</label>
-                        <input id="neighborhoodName" class="form-control" formControlName="neighborhoodName" required />
-                        <div *ngIf="addNeighborhoodForm.get('neighborhoodName')?.invalid && addNeighborhoodForm.get('neighborhoodName')?.touched " class="form-text">
-                          Name is required.
-                        </div>
-                      </div>
-                      <div class="col-md-6">
-                        <label for="city" class="form-label">City:</label>
-                        <input id="city" class="form-control"  formControlName="city" required />
-                        <div *ngIf="addNeighborhoodForm.get('city')?.invalid && addNeighborhoodForm.get('city')?.touched" class="form-text">
-                          Enter a valid city.
-                        </div>
-                      </div>
-                      <div class="col-md-2">
-                        <label for="zip" class="form-label">Zip:</label>
-                        <input id="zip" class="form-control"  formControlName="zip" required />
-                      </div>
-                      <div class="col-md-2">
-                          <label for="state" class="form-label">State:</label>
-                          <input id="state" class="form-control"  formControlName="state" required />
-                      </div>
-                      <div class="col-md-2">
-                          <label for="latitude" class="form-label">Latitude:</label>
-                          <input id="latitude" class="form-control"  formControlName="latitude" required />
-                      </div>
-                      <div class="col-md-2">
-                          <label for="longitude" class="form-label">Longitude:</label>
-                          <input id="longitude" class="form-control"  formControlName="longitude" required />
-                      </div>
-                      <div class="col-md-2">
-                          <label for="feetRadius" class="form-label">FeetRadius:</label>
-                          <input id="feetRadius" class="form-control"  formControlName="feetRadius" required />
-                      </div>
-                      <div class="col-12 d-flex justify-content-end">
-                        <!-- Show Submit button only when not in Edit Mode -->
-                        <button *ngIf="!isEditMode" type="submit" [disabled]="addNeighborhoodForm.invalid" class="btn btn-light">Submit</button>
-                        <!-- Only show Save button if in Edit Mode -->
-                        <button *ngIf="isEditMode" (click)="onSave()" type="button" class="btn btn-primary" [disabled]="addNeighborhoodForm.invalid" class="btn btn-light">Save</button>
-                      </div>
-                  </form>
+              <div class="col-md-6">
+                <label for="city" class="form-label">City:</label>
+                <input id="city" class="form-control" formControlName="city" required />
+                <div *ngIf="addNeighborhoodForm.get('city')?.invalid && addNeighborhoodForm.get('city')?.touched" class="form-text">Enter a valid city.</div>
               </div>
-          </div>
+              <div class="col-md-4">
+                <label for="zip" class="form-label">Zip:</label>
+                <input id="zip" class="form-control" formControlName="zip" required />
+              </div>
+              <div class="col-md-4">
+                <label for="state" class="form-label">State:</label>
+                <input id="state" class="form-control" formControlName="state" required />
+              </div>
+              <div class="col-md-4">
+                <label for="feetRadius" class="form-label">Feet Radius:</label>
+                <input id="feetRadius" class="form-control" formControlName="feetRadius" required />
+              </div>
+              <div class="col-md-6">
+                <label for="latitude" class="form-label">Latitude:</label>
+                <input id="latitude" class="form-control" formControlName="latitude" required />
+              </div>
+              <div class="col-md-6">
+                <label for="longitude" class="form-label">Longitude:</label>
+                <input id="longitude" class="form-control" formControlName="longitude" required />
+              </div>
+              <div class="col-12 d-flex justify-content-end">
+                <button *ngIf="!isEditMode" type="submit" [disabled]="addNeighborhoodForm.invalid" class="btn btn-light">Submit</button>
+                <button *ngIf="isEditMode" type="button" (click)="onSave()" [disabled]="addNeighborhoodForm.invalid" class="btn btn-primary">Save</button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
+    </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -13,9 +13,9 @@ import DataTables from 'datatables.net-bs5';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './new-neighborhood.component.html',
-  styleUrl: './new-neighborhood.component.scss'
+  styleUrls: ['./new-neighborhood.component.scss']
 })
-export class NewNeighborhoodComponent implements OnInit {
+export class NewNeighborhoodComponent implements OnInit, AfterViewInit {
     @ViewChild('closeModalBtn') closeModalBtn!: ElementRef; // Modal close button reference
     @ViewChild('modalElement') modalElement!: ElementRef; // Modal reference
     @ViewChild('dataTable', { static: false }) table!: ElementRef; // DataTable reference
@@ -26,8 +26,13 @@ export class NewNeighborhoodComponent implements OnInit {
     isEditMode: boolean = false;
     private modalInstance: any = null;
     private dataTable: any = null;
+    private tableClickListenerAttached = false; // Flag to ensure we attach listener only once
 
-    constructor(private neighborhoodService: NeighborhoodService, private fb: FormBuilder, private router: Router) {
+    constructor(
+      private neighborhoodService: NeighborhoodService,
+      private fb: FormBuilder,
+      private router: Router
+    ) {
         this.addNeighborhoodForm = this.fb.group({
             neighborhoodId: [0],
             neighborhoodName: ['', Validators.required],
@@ -44,9 +49,17 @@ export class NewNeighborhoodComponent implements OnInit {
         this.getNeighborhoods();
     }
 
+    ngAfterViewInit(): void {
+      // Attach the table click listener only once.
+      if (!this.tableClickListenerAttached && this.table) {
+          this.table.nativeElement.addEventListener('click', this.onTableClick.bind(this));
+          this.tableClickListenerAttached = true;
+      }
+    }
+
     async onSubmit() {
         try {
-            await this.neighborhoodService.addNeighborhood(this.addNeighborhoodForm.value).subscribe(() => {
+            this.neighborhoodService.addNeighborhood(this.addNeighborhoodForm.value).subscribe(() => {
                 this.getNeighborhoods();
                 this.closeModal();
             });
@@ -57,11 +70,9 @@ export class NewNeighborhoodComponent implements OnInit {
     }
 
     addNeighborhood(): void {
-      // Reset form and explicitly update validity
-      this.isEditMode = false; // Ensure we're in add mode
-      //this.selectedNeighborhoodId = null;
+      this.isEditMode = false;
       this.addNeighborhoodForm.reset({
-        neighborhoodId: 0, // Explicitly set to 0
+        neighborhoodId: 0,
         neighborhoodName: '',
         city: '',
         zip: '',
@@ -73,7 +84,6 @@ export class NewNeighborhoodComponent implements OnInit {
       this.openModal();
     }
   
-
     getNeighborhoods(): void {
         this.neighborhoodService.getNeighborhoods().subscribe(
             (data: Neighborhood[]) => {
@@ -87,11 +97,11 @@ export class NewNeighborhoodComponent implements OnInit {
     private initializeDataTable(): void {
         setTimeout(() => {
             if (this.dataTable) {
-                this.dataTable.destroy(); // Destroy old instance before reinitializing
+                this.dataTable.destroy(); // Destroy previous instance before reinitializing
             }
     
             this.dataTable = new DataTables(this.table.nativeElement, {
-                data: this.neighborhoods, // Ensure DataTables receives data
+                data: this.neighborhoods,
                 columns: [
                     { title: 'ID', data: 'neighborhoodId' },
                     { title: 'Name', data: 'neighborhoodName' },
@@ -114,30 +124,34 @@ export class NewNeighborhoodComponent implements OnInit {
                 searching: true,
                 ordering: true
             });
-    
-            // Attach event listeners
-            this.table.nativeElement.addEventListener('click', (event: Event) => {
-                const target = event.target as HTMLElement;
-                if (target.classList.contains('delete-btn')) {
-                    const id = target.getAttribute('data-id');
-                    if (id) this.deleteNeighborhood(Number(id));
-                }
-                if (target.classList.contains('update-btn')) {
-                    const id = target.getAttribute('data-id');
-                    if (id) this.updateNeighborhood(Number(id));
-                }
-            });
-    
-        }, 100); // Small delay ensures table is rendered before initialization
+        }, 100);
+    }
+
+    // Extracted table click handler.
+    private onTableClick(event: Event): void {
+        const target = event.target as HTMLElement;
+        if (target.classList.contains('delete-btn')) {
+            const id = target.getAttribute('data-id');
+            if (id) {
+                this.deleteNeighborhood(Number(id));
+            }
+        } else if (target.classList.contains('update-btn')) {
+            const id = target.getAttribute('data-id');
+            if (id) {
+                this.updateNeighborhood(Number(id));
+            }
+        }
     }
 
     deleteNeighborhood(id: number): void {
-        if (confirm('Are you sure you want to delete this neighborhood?')) {
-            this.neighborhoodService.deleteNeighborhood(id).subscribe(() => {
-                console.log(`Neighborhood with ID ${id} deleted.`);
-                this.getNeighborhoods();
-            }, (error) => console.error('Error deleting neighborhood:', error));
+        if (!window.confirm('Are you sure you want to delete this neighborhood?')) {
+            return;
         }
+    
+        this.neighborhoodService.deleteNeighborhood(id).subscribe(() => {
+            console.log(`Neighborhood with ID ${id} deleted.`);
+            this.getNeighborhoods();
+        }, (error) => console.error('Error deleting neighborhood:', error));
     }
 
     updateNeighborhood(id: number): void {
@@ -153,7 +167,7 @@ export class NewNeighborhoodComponent implements OnInit {
     async onSave() {
         if (this.selectedNeighborhoodId !== null) {
             try {
-                await this.neighborhoodService.updateNeighborhood(this.selectedNeighborhoodId, this.addNeighborhoodForm.value).subscribe(() => {
+                this.neighborhoodService.updateNeighborhood(this.selectedNeighborhoodId, this.addNeighborhoodForm.value).subscribe(() => {
                     this.closeModal();
                     this.getNeighborhoods();
                 });
