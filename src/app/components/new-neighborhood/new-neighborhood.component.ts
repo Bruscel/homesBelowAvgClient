@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { NeighborhoodService } from '../../services/neighborhood.service';
 import { Neighborhood } from '../../models/neighborhood.model';
 import 'datatables.net';
+// Import Bootstrap's Modal class
+import { Modal } from 'bootstrap';
 
 
 
@@ -18,9 +20,12 @@ import 'datatables.net';
 export class NewNeighborhoodComponent implements OnInit{
     @ViewChild('closeModalBtn') closeModalBtn!: ElementRef; // Reference to modal
     @ViewChild('dataTable', { static: false }) table!: ElementRef;
+    selectedNeighborhoodId: number | null = null;
     addNeighborhoodForm: FormGroup;
     neighborhoods: Neighborhood[] = [];// Holds submitted data
     dataTableInstance: any;
+    isEditMode: boolean = false;  // Track whether the form is in edit mode
+    modalInstance: Modal | null = null;
 
 
     // ngAfterViewInit(): void {
@@ -42,6 +47,19 @@ export class NewNeighborhoodComponent implements OnInit{
  
     ngOnInit(): void {
       this.getNeighborhoods();
+
+      const modalElement = document.getElementById('neighborhoodModal');
+
+      if (modalElement) {
+        modalElement.addEventListener('hidden.bs.modal', () => {
+          this.isEditMode = false;
+          this.selectedNeighborhoodId = null;
+          this.addNeighborhoodForm.reset();
+
+          // Ensure no lingering backdrops
+          document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.remove());
+        });
+      }
     }
     
     async onSubmit() {
@@ -51,10 +69,7 @@ export class NewNeighborhoodComponent implements OnInit{
             this.closeModalBtn.nativeElement.click(); // Click close button to hide modal
           }
         );
-
         console.log('Form submitted successfully!');
-
-
       } catch (error) {
         console.error('Submission failed:', error);
       }
@@ -86,7 +101,7 @@ export class NewNeighborhoodComponent implements OnInit{
                   title: 'Actions', 
                   data: null, 
                   render: (data: any) => {
-                    return `<button class='btn btn-danger btn-sm delete-btn' data-id='${data.neighborhoodId}'>Delete</button>`;
+                    return `<button class='btn btn-danger btn-sm delete-btn' data-id='${data.neighborhoodId}'>Delete</button> <button class='btn btn-light update-btn' data-id='${data.neighborhoodId}'>Update</button>`;
                   }
                 }
               ],
@@ -99,6 +114,11 @@ export class NewNeighborhoodComponent implements OnInit{
             $(this.table.nativeElement).on('click', '.delete-btn', (event) => {
               const id = $(event.currentTarget).data('id');
               this.deleteNeighborhood(id);
+            });
+
+            $(this.table.nativeElement).on('click', '.update-btn', (event) => {
+              const id = $(event.currentTarget).data('id');
+              this.updateNeighborhood(id);
             });
           }, 0);
         },
@@ -117,6 +137,51 @@ export class NewNeighborhoodComponent implements OnInit{
           console.error('Error deleting neighborhood:', error);
         });
       }
+    }
+
+    updateNeighborhood(id: number): void {
+      this.selectedNeighborhoodId = id;
+      this.isEditMode = true;  // Set the form to edit mode
+
+      // Fetch the data for the selected neighborhood
+      try {
+        this.neighborhoodService.getNeighborhoodById(id).subscribe((data) => {
+        this.addNeighborhoodForm.patchValue(data);
+        });
+      } catch (error) {
+        console.error('Get request failed:', error);
+      }
+      
+      // Open the modal using Bootstrap 5
+      const modalElement = document.getElementById('neighborhoodModal');
+      if (modalElement) {
+        this.modalInstance = new Modal(modalElement, {backdrop: true});
+        this.modalInstance.show();
+      }
+    }
+
+    async onSave() {
+      if (this.selectedNeighborhoodId !== null) {
+        // Send the updated data to the API
+        try {
+          await this.neighborhoodService.updateNeighborhood(this.selectedNeighborhoodId, this.addNeighborhoodForm.value).subscribe(() => {
+              // Close the modal
+              if (this.modalInstance) {
+                this.modalInstance.hide();
+                //this.modalInstance.dispose(); // Dispose of modal instance to avoid memory leaks
+                this.modalInstance = null;
+              }
+              this.getNeighborhoods();// Refresh table data
+            }
+          );
+          console.log('Form submitted successfully!');
+        } catch (error) {
+          console.error('Submission failed:', error);
+        }
+      } else {
+        console.error('No neighborhood selected!');
+      }
+
     }
 
 }

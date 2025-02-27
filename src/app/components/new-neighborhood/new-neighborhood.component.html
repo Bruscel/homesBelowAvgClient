@@ -80,7 +80,10 @@
                   <input id="feetRadius" class="form-control"  formControlName="feetRadius" required />
               </div>
               <div class="col-12 d-flex justify-content-end">
-                <button type="submit" [disabled]="addNeighborhoodForm.invalid" class="btn btn-light">Submit</button>
+                <!-- Show Submit button only when not in Edit Mode -->
+                <button *ngIf="!isEditMode" type="submit" [disabled]="addNeighborhoodForm.invalid" class="btn btn-light">Submit</button>
+                <!-- Only show Save button if in Edit Mode -->
+                <button *ngIf="isEditMode" (click)="onSave()" type="button" class="btn btn-primary" [disabled]="addNeighborhoodForm.invalid" class="btn btn-light">Save</button>
               </div>
           </form>
         </div>

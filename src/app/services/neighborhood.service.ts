@@ -41,7 +41,18 @@ export class NeighborhoodService {
     );
   }
 
+  // Method to get neighborhood by ID
+  getNeighborhoodById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
   deleteNeighborhood(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  updateNeighborhood(id: number, neighborhoodData: Neighborhood): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/${id}`, neighborhoodData);
+  }
+
+
 }
