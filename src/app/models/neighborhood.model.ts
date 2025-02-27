@@ -1,5 +1,5 @@
 export interface Neighborhood {
-    neighborhoodId: 0
+    neighborhoodId: 0;
     neighborhoodName: string;        
     city: string; 
     zip: string;      
